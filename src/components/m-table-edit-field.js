@@ -85,11 +85,16 @@ class MTableEditField extends React.Component {
   }
 
   renderDateField() {
+    const dateFormat =
+      this.props.columnDef.dateSetting &&
+      this.props.columnDef.dateSetting.format
+        ? this.props.columnDef.dateSetting.format
+        : "dd.MM.yyyy";
     return (
       <MuiPickersUtilsProvider utils={DateFnsUtils} locale={this.props.locale}>
         <DatePicker
           {...this.getProps()}
-          format="dd.MM.yyyy"
+          format={dateFormat}
           value={this.props.value || null}
           onChange={this.props.onChange}
           clearable
@@ -118,9 +123,9 @@ class MTableEditField extends React.Component {
             style: {
               fontSize: 13,
             },
-            inputProps: {
-              "aria-label": `${this.props.columnDef.title}: press space to edit`,
-            },
+          }}
+          inputProps={{
+            "aria-label": `${this.props.columnDef.title}: press space to edit`,
           }}
         />
       </MuiPickersUtilsProvider>
@@ -140,9 +145,9 @@ class MTableEditField extends React.Component {
             style: {
               fontSize: 13,
             },
-            inputProps: {
-              "aria-label": `${this.props.columnDef.title}: press space to edit`,
-            },
+          }}
+          inputProps={{
+            "aria-label": `${this.props.columnDef.title}: press space to edit`,
           }}
         />
       </MuiPickersUtilsProvider>
@@ -173,9 +178,9 @@ class MTableEditField extends React.Component {
           style: {
             fontSize: 13,
           },
-          inputProps: {
-            "aria-label": this.props.columnDef.title,
-          },
+        }}
+        inputProps={{
+          "aria-label": this.props.columnDef.title,
         }}
       />
     );
@@ -198,12 +203,14 @@ class MTableEditField extends React.Component {
           }
           return this.props.onChange(value);
         }}
-        inputProps={{
+        InputProps={{
           style: {
             fontSize: 13,
             textAlign: "right",
-            "aria-label": this.props.columnDef.title,
           },
+        }}
+        inputProps={{
+          "aria-label": this.props.columnDef.title,
         }}
         onKeyDown={this.props.onKeyDown}
         autoFocus={this.props.autoFocus}
@@ -238,7 +245,7 @@ MTableEditField.propTypes = {
   value: PropTypes.any,
   onChange: PropTypes.func.isRequired,
   columnDef: PropTypes.object.isRequired,
-  dateTimePickerLocalization: PropTypes.object,
+  locale: PropTypes.object,
 };
 
 export default MTableEditField;
