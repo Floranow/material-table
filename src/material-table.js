@@ -341,9 +341,15 @@ export default class MaterialTable extends React.Component {
 
   onChangeOrder = (orderBy, orderDirection) => {
     const newOrderBy = orderDirection === "" ? -1 : orderBy;
-    this.dataManager.changeOrder(newOrderBy, orderDirection);
 
-    if (this.isRemoteData()) {
+    if (this.props.options.remoteSort) {
+      const orderBy = this.state.columns.find(
+        (a) => a.tableData.id === newOrderBy
+      );
+      this.props.onRemoteSort &&
+        this.props.onRemoteSort(orderBy, orderDirection);
+    } else if (this.isRemoteData()) {
+      this.dataManager.changeOrder(newOrderBy, orderDirection);
       const query = { ...this.state.query };
       query.page = 0;
       query.orderBy = this.state.columns.find(
@@ -355,6 +361,7 @@ export default class MaterialTable extends React.Component {
           this.props.onOrderChange(newOrderBy, orderDirection);
       });
     } else {
+      this.dataManager.changeOrder(newOrderBy, orderDirection);
       this.setState(this.dataManager.getRenderState(), () => {
         this.props.onOrderChange &&
           this.props.onOrderChange(newOrderBy, orderDirection);
@@ -659,12 +666,27 @@ export default class MaterialTable extends React.Component {
   }, this.props.options.debounceInterval);
 
   onFilterChange = (columnId, value) => {
-    this.dataManager.changeFilterValue(columnId, value);
-    this.setState({}, this.onFilterChangeDebounce);
+    if (this.props.options.remoteFilter) {
+      this.props.onRemoteFilter && this.props.onRemoteFilter(columnId, value);
+    } else {
+      this.dataManager.changeFilterValue(columnId, value);
+      this.setState({}, this.onFilterChangeDebounce);
+    }
   };
 
   onFilterChangeDebounce = debounce(() => {
-    if (this.isRemoteData()) {
+    if (this.props.options.remoteFilter) {
+      if (this.props.onFilterChange) {
+        const appliedFilters = this.state.columns
+          .filter((a) => a.tableData.filterValue)
+          .map((a) => ({
+            column: a,
+            operator: "=",
+            value: a.tableData.filterValue,
+          }));
+        this.props.onFilterChange(appliedFilters);
+      }
+    } else if (this.isRemoteData()) {
       const query = { ...this.state.query };
       query.page = 0;
       query.filters = this.state.columns
